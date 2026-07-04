@@ -90,10 +90,9 @@ router.post("/", async (req, res) => {
       },
     });
   }
-  //call payment service to process payment
 
   const paymentResult = await paymentBreaker.fire({
-    data: { customerId, orderId: order._id.toString(), amount },
+    data: { customerId, orderId: order._id.toString(), productId, amount },
     correlationId: req.correlationId,
   });
 
@@ -102,7 +101,6 @@ router.post("/", async (req, res) => {
   } else {
     order.orderStatus = "failed";
   }
-  //save order
   await order.save();
   return res.status(201).json({
     data: {
