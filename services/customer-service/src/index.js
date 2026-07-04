@@ -2,22 +2,22 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
+const customerRoutes = require("./routes/customerRoutes");
 const app = express();
 
 app.use(express.json());
+app.use("/customers", customerRoutes);
 
 connectDB();
 
 app.get("/health", (req, res) => {
   const dbState = mongoose.connection.readyState; // 1 = connected
   if (dbState !== 1) {
-    return res
-      .status(503)
-      .json({
-        status: "degraded",
-        service: "customer-service",
-        db: "disconnected",
-      });
+    return res.status(503).json({
+      status: "degraded",
+      service: "customer-service",
+      db: "disconnected",
+    });
   }
   res.status(200).json({ status: "ok", service: "customer-service" });
 });
