@@ -115,8 +115,6 @@ things are intentionally out of scope:
   `completed`/`failed` after. If the process crashes in between, that order
   stays `pending` forever with nothing to sweep it — there's no background
   job to reconcile orders against payment-service's state.
-- **No graceful drain on shutdown beyond closing the DB/AMQP connections** —
-  in-flight requests aren't drained before a service exits.
 - **Payment-service is intentionally not a real payment integration** — per
   the assignment, it simulates success/failure with `Math.random()` against
   `PAYMENT_FAILURE_RATE` rather than calling out to a payment provider.
