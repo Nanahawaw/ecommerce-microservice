@@ -3,10 +3,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const customerRoutes = require("./routes/customerRoutes");
+const verifyInternalKey = require("./middleware/verifyInternalKey");
 const app = express();
 
 app.use(express.json());
-app.use("/customers", customerRoutes);
+app.use("/customers", verifyInternalKey, customerRoutes);
 
 connectDB();
 

@@ -2,9 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
+const orderRoutes = require("./routes/orderRoutes");
 const app = express();
 
 app.use(express.json());
+app.use("/orders", orderRoutes);
 
 connectDB();
 
