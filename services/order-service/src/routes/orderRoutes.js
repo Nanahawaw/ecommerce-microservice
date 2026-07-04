@@ -1,7 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
-const callService = require("../utils/httpClient");
+const { callService } = require("../utils/httpClient");
+const paymentBreaker = require("../utils/paymentBreaker");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -32,6 +33,7 @@ router.post("/", async (req, res) => {
   const customerResult = await callService({
     url: `${process.env.CUSTOMER_SERVICE_URL}/customers/${customerId}`,
     apiKey: process.env.CUSTOMER_SERVICE_API_KEY,
+    correlationId: req.correlationId,
   });
   if (!customerResult.ok) {
     if (customerResult.status === 404) {
@@ -51,6 +53,7 @@ router.post("/", async (req, res) => {
   const productResult = await callService({
     url: `${process.env.PRODUCT_SERVICE_URL}/products/${productId}`,
     apiKey: process.env.PRODUCT_SERVICE_API_KEY,
+    correlationId: req.correlationId,
   });
   if (!productResult.ok) {
     if (productResult.status === 404) {
@@ -89,11 +92,9 @@ router.post("/", async (req, res) => {
   }
   //call payment service to process payment
 
-  const paymentResult = await callService({
-    url: `${process.env.PAYMENT_SERVICE_URL}/payments`,
-    method: "POST",
+  const paymentResult = await paymentBreaker.fire({
     data: { customerId, orderId: order._id.toString(), amount },
-    apiKey: process.env.PAYMENT_SERVICE_API_KEY,
+    correlationId: req.correlationId,
   });
 
   if (paymentResult.ok && paymentResult.body.data.status === "success") {

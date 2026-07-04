@@ -3,9 +3,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const orderRoutes = require("./routes/orderRoutes");
+const correlationId = require("./middleware/correlationId");
 const app = express();
 
 app.use(express.json());
+app.use(correlationId);
 app.use("/orders", orderRoutes);
 
 connectDB();

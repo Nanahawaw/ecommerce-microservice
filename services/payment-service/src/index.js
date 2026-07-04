@@ -4,9 +4,11 @@ const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const paymentRoutes = require("./routes/paymentRoutes");
 const verifyInternalKey = require("./middleware/verifyInternalKey");
+const correlationId = require("./middleware/correlationId");
 const app = express();
 
 app.use(express.json());
+app.use(correlationId);
 app.use("/payments", verifyInternalKey, paymentRoutes);
 
 connectDB();
