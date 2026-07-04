@@ -88,7 +88,21 @@ router.post("/", async (req, res) => {
     });
   }
   //call payment service to process payment
+
+  const paymentResult = await callService({
+    url: `${process.env.PAYMENT_SERVICE_URL}/payments`,
+    method: "POST",
+    data: { customerId, orderId: order._id.toString(), amount },
+    apiKey: process.env.PAYMENT_SERVICE_API_KEY,
+  });
+
+  if (paymentResult.ok && paymentResult.body.data.status === "success") {
+    order.orderStatus = "completed";
+  } else {
+    order.orderStatus = "failed";
+  }
   //save order
+  await order.save();
   return res.status(201).json({
     data: {
       customerId: order.customerId,
