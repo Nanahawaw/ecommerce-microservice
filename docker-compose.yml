@@ -1,0 +1,24 @@
+services:
+  customer-service:
+    build: ./services/customer-service
+    ports:
+      - "4001:4001"
+    env_file: ./services/customer-service/.env
+
+  product-service:
+    build: ./services/product-service
+    ports:
+      - "4002:4002"
+    env_file: ./services/product-service/.env
+
+  order-service:
+    build: ./services/order-service
+    ports:
+      - "4003:4003"
+    env_file: ./services/order-service/.env
+
+  payment-service:
+    build: ./services/payment-service
+    ports:
+      - "4004:4004"
+    env_file: ./services/payment-service/.env
