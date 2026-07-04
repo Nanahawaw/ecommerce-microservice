@@ -1,0 +1,9 @@
+{
+  "name": "seed",
+  "version": "1.0.0",
+  "private": true,
+  "main": "seed.js",
+  "dependencies": {
+    "mongoose": "^8.0.0"
+  }
+}

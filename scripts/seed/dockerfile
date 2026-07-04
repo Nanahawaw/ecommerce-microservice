@@ -1,0 +1,9 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY scripts/seed/package*.json ./
+RUN npm install
+COPY scripts/seed/ ./scripts/seed/
+COPY services/customer-service/src/models /app/services/customer-service/src/models
+COPY services/product-service/src/models /app/services/product-service/src/models
+WORKDIR /app/scripts/seed
+CMD ["node", "seed.js"]

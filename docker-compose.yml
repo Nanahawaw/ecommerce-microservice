@@ -1,24 +1,99 @@
 services:
+  seed:
+    build:
+      context: .
+      dockerfile: ./scripts/seed/dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
+    profiles: ["tools"]
+
   customer-service:
     build: ./services/customer-service
     ports:
       - "4001:4001"
     env_file: ./services/customer-service/.env
-
-  product-service:
-    build: ./services/product-service
-    ports:
-      - "4002:4002"
-    env_file: ./services/product-service/.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   order-service:
     build: ./services/order-service
     ports:
-      - "4003:4003"
+      - "4002:4002"
     env_file: ./services/order-service/.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   payment-service:
     build: ./services/payment-service
     ports:
-      - "4004:4004"
+      - "4003:4003"
     env_file: ./services/payment-service/.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  product-service:
+    build: ./services/product-service
+    ports:
+      - "4004:4004"
+    env_file: ./services/product-service/.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" # AMQP protocol port
+      - "15672:15672" # management UI — http://localhost:15672, default guest/guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo-data:
